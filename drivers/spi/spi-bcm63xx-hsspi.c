@@ -374,10 +374,10 @@ static int __exit bcm63xx_hsspi_remove(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_PM
-static int bcm63xx_hsspi_suspend(struct platform_device *pdev,
-				 pm_message_t mesg)
+static int bcm63xx_hsspi_suspend(struct device *dev)
 {
-	struct spi_master *master = platform_get_drvdata(pdev);
+	struct spi_master *master =
+		platform_get_drvdata(to_platform_device(dev));
 	struct bcm63xx_hsspi *bs = spi_master_get_devdata(master);
 
 	spi_master_suspend(master);
@@ -386,9 +386,10 @@ static int bcm63xx_hsspi_suspend(struct platform_device *pdev,
 	return 0;
 }
 
-static int bcm63xx_hsspi_resume(struct platform_device *pdev)
+static int bcm63xx_hsspi_resume(struct device *dev)
 {
-	struct spi_master *master = platform_get_drvdata(pdev);
+	struct spi_master *master =
+		platform_get_drvdata(to_platform_device(dev));
 	struct bcm63xx_hsspi *bs = spi_master_get_devdata(master);
 
 	clk_enable(bs->clk);
