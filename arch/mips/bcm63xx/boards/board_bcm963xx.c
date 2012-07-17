@@ -984,7 +984,7 @@ static const struct board_info __initdata *bcm963xx_boards[] = {
 	&board_96368mvwg,
 	&board_96368mvngr,
 #endif
-#ifdef CONFIG_BCM63XX_CPU_6368
+#ifdef CONFIG_BCM63XX_CPU_63268
 	&board_vw6339gu,
 #endif
 };
