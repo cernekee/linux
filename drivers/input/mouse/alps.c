@@ -987,8 +987,7 @@ static int alps_rpt_cmd(struct psmouse *psmouse, int init_command,
 	return 0;
 }
 
-static int alps_enter_command_mode(struct psmouse *psmouse,
-				   unsigned char *resp)
+static int alps_enter_command_mode(struct psmouse *psmouse)
 {
 	unsigned char param[4];
 
@@ -1003,8 +1002,6 @@ static int alps_enter_command_mode(struct psmouse *psmouse,
 		return -1;
 	}
 
-	if (resp)
-		*resp = param[2];
 	return 0;
 }
 
@@ -1210,7 +1207,7 @@ static int alps_hw_init_v3(struct psmouse *psmouse)
 	priv->nibble_commands = alps_v3_nibble_commands;
 	priv->addr_command = PSMOUSE_CMD_RESET_WRAP;
 
-	if (alps_enter_command_mode(psmouse, NULL))
+	if (alps_enter_command_mode(psmouse))
 		goto error;
 
 	/* Check for trackstick */
@@ -1260,7 +1257,7 @@ static int alps_hw_init_v3(struct psmouse *psmouse)
 			}
 		}
 
-		if (alps_enter_command_mode(psmouse, NULL))
+		if (alps_enter_command_mode(psmouse))
 			goto error_passthrough;
 		if (alps_passthrough_mode_v3(psmouse, false))
 			goto error;
@@ -1325,7 +1322,7 @@ static int alps_hw_init_v3(struct psmouse *psmouse)
 
 error_passthrough:
 	/* Something failed while in passthrough mode, so try to get out */
-	if (!alps_enter_command_mode(psmouse, NULL))
+	if (!alps_enter_command_mode(psmouse))
 		alps_passthrough_mode_v3(psmouse, false);
 error:
 	/*
@@ -1362,7 +1359,7 @@ static int alps_hw_init_v4(struct psmouse *psmouse)
 	priv->nibble_commands = alps_v4_nibble_commands;
 	priv->addr_command = PSMOUSE_CMD_DISABLE;
 
-	if (alps_enter_command_mode(psmouse, NULL))
+	if (alps_enter_command_mode(psmouse))
 		goto error;
 
 	if (alps_absolute_mode_v4(psmouse)) {
