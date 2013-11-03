@@ -1,0 +1,5 @@
+unbootimg
+mkbootimg
+.kernel-configured
+boot.img*
+orig.img*

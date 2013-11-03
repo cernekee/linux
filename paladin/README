@@ -1,0 +1,73 @@
+Rebuilding boot.img with a new kernel
+=====================================
+
+Instructions for the Ainol Novo 7 Paladin MIPS tablet
+Copyright (C) 2013 Kevin Cernekee <cernekee@gmail.com>
+
+
+Warnings:
+
+THIS MAY BRICK YOUR TABLET.  These instructions are offered with no warranty.
+
+Make sure you're comfortable reinstalling your existing ROM, if something
+goes wrong.
+
+The only hardware known to work with these instructions is the Novo 7 Paladin.
+
+Changing "too" many kernel options may break compatibility with binary modules
+in the rootfs (dhd.ko) or initrd.
+
+
+Rationale:
+
+The kernel shipped with the Paladin stock ROM is missing several important
+networking features, such as proper Netfilter support.  To fix this, we can
+rebuild the kernel with a slightly different configuration.
+
+
+Basic usage:
+
+Unzip your original Paladin ROM and copy its boot.img to orig.img, then:
+
+git submodule init
+git submodule update
+make NDK=/opt/android-ndk-r9b
+
+Minimum NDK version is r9b.
+
+
+Installation:
+
+Install CWM on the device: http://androtab.info/mips/ingenic/clockworkmod/
+
+Make sure "adb" is in your path, then:
+
+adb reboot recovery
+# wait until CWM comes up
+make install
+
+Push the reset button with a pin (the "reboot" command doesn't work
+consistently).
+
+If the main system image is unbootable, you can get back to recovery by
+holding VOL+ while pressing the reset button.
+
+
+eMMC Partitions:
+
+The magic "dd" command line is based on the following information:
+
+# cat /sys/class/mmc_host/mmc0/device/partitions 
+mbr 0 200 0
+xboot 0 200000 0
+boot 300000 800000 0
+recovery c00000 800000 0
+misc 1500000 400000 0
+battery 1a00000 100000 0
+cache 1c00000 1e00000 1
+device_id 3b00000 200000 0
+system 4000000 10000000 1
+data 14100000 20000000 1
+test_0 0 ffffffff 0
+
+There may be a better way to do this.
