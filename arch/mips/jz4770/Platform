@@ -3,4 +3,5 @@ cflags-$(CONFIG_SOC_JZ4770)	+= -I$(srctree)/arch/mips/jz4770/include/
 cflags-$(CONFIG_SOC_JZ4770)	+= -I$(srctree)/arch/mips/jz4770/boards/
 cflags-$(CONFIG_SOC_JZ4770)	+= -I$(srctree)/arch/mips/include/asm/mach-xburst/
 cflags-$(CONFIG_SOC_JZ4770)	+= -I$(srctree)/drivers/video/include/
+cflags-$(CONFIG_SOC_JZ4770)	+= -mmxu
 load-$(CONFIG_SOC_JZ4770)	+= 0xffffffff80010000
