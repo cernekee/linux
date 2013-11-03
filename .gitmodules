@@ -1,0 +1,6 @@
+[submodule "paladin/submodules/android_system_core"]
+	path = paladin/submodules/android_system_core
+	url = git://github.com/cernekee/android_system_core
+[submodule "paladin/submodules/unbootimg"]
+	path = paladin/submodules/unbootimg
+	url = git://github.com/cernekee/unbootimg
