@@ -1,0 +1,174 @@
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "brcm,bcm7425";
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		mips-hpt-frequency = <163125000>;
+
+		cpu@0 {
+			compatible = "brcm,bmips5000";
+			device_type = "cpu";
+			reg = <0>;
+		};
+
+		cpu@1 {
+			compatible = "brcm,bmips5000";
+			device_type = "cpu";
+			reg = <1>;
+		};
+	};
+
+	aliases {
+		uart0 = &uart0;
+	};
+
+	cpu_intc: cpu_intc@0 {
+		#address-cells = <0>;
+		compatible = "mti,cpu-interrupt-controller";
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+
+	periph_intc: periph_intc@1041a400 {
+		compatible = "brcm,bcm7038-l1-intc";
+		reg = <0x1041a400 0x30 0x1041a600 0x30>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&cpu_intc>;
+		interrupts = <2>, <3>;
+	};
+
+	upg_irq0_intc: upg_irq0_intc@10406780 {
+		compatible = "brcm,bcm7120-l2-intc";
+		reg = <0x10406780 0x8>;
+
+		brcm,int-map-mask = <0x44>;
+		brcm,int-fwd-mask = <0x70000>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&periph_intc>;
+		interrupts = <55>;
+	};
+
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		uart_clk: uart_clk@0 {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <81000000>;
+		};
+	};
+
+	uart0: serial@10406b00 {
+		compatible = "ns16550a";
+		reg = <0x10406b00 0x20>;
+		reg-io-width = <0x1>;
+		reg-shift = <0x2>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <61>;
+		clocks = <&uart_clk>;
+		status = "disabled";
+	};
+
+	enet0: ethernet@10b80000 {
+		phy-mode = "internal";
+		phy-handle = <&phy1>;
+		mac-address = [ 00 10 18 36 23 1a ];
+		compatible = "brcm,genet-v3";
+		#address-cells = <0x1>;
+		#size-cells = <0x1>;
+		reg = <0x10b80000 0x11c88>;
+		interrupts = <17>, <18>;
+		interrupt-parent = <&periph_intc>;
+		status = "disabled";
+
+		mdio@e14 {
+			compatible = "brcm,genet-mdio-v3";
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0xe14 0x8>;
+
+			phy1: ethernet-phy@1 {
+				max-speed = <100>;
+				reg = <0x1>;
+				compatible = "brcm,40nm-ephy",
+					     "ethernet-phy-ieee802.3-c22";
+			};
+		};
+	};
+
+	ehci0: usb@10480300 {
+		compatible = "brcm,bcm7425-ehci", "generic-ehci";
+		reg = <0x10480300 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <65>;
+		status = "disabled";
+	};
+
+	ohci0: usb@10480400 {
+		compatible = "brcm,bcm7425-ohci", "generic-ohci";
+		reg = <0x10480400 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <67>;
+		status = "disabled";
+	};
+
+	ehci1: usb@10480500 {
+		compatible = "brcm,bcm7425-ehci", "generic-ehci";
+		reg = <0x10480500 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <66>;
+		status = "disabled";
+	};
+
+	ohci1: usb@10480600 {
+		compatible = "brcm,bcm7425-ohci", "generic-ohci";
+		reg = <0x10480600 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <68>;
+		status = "disabled";
+	};
+
+	ehci2: usb@10490300 {
+		compatible = "brcm,bcm7425-ehci", "generic-ehci";
+		reg = <0x10490300 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <70>;
+		status = "disabled";
+	};
+
+	ohci2: usb@10490400 {
+		compatible = "brcm,bcm7425-ohci", "generic-ohci";
+		reg = <0x10490400 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <72>;
+		status = "disabled";
+	};
+
+	ehci3: usb@10490500 {
+		compatible = "brcm,bcm7425-ehci", "generic-ehci";
+		reg = <0x10490500 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <71>;
+		status = "disabled";
+	};
+
+	ohci3: usb@10490600 {
+		compatible = "brcm,bcm7425-ohci", "generic-ohci";
+		reg = <0x10490600 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <73>;
+		status = "disabled";
+	};
+};

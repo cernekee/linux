@@ -1,0 +1,44 @@
+/ {
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		periph_clk: periph_clk@0 {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <54000000>;
+		};
+	};
+
+	aliases {
+		uart0 = &uart0;
+	};
+
+	uart0: serial@14e00520 {
+		compatible = "brcm,bcm6345-uart";
+		reg = <0x14e00520 0x18>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <2>;
+		clocks = <&periph_clk>;
+		status = "disabled";
+	};
+
+	ehci0: usb@15400300 {
+		compatible = "brcm,bcm3384-ehci", "generic-ehci";
+		reg = <0x15400300 0x100>;
+		big-endian;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <41>;
+		status = "disabled";
+	};
+
+	ohci0: usb@15400400 {
+		compatible = "brcm,bcm3384-ohci", "generic-ohci";
+		reg = <0x15400400 0x100>;
+		big-endian;
+		no-big-frame-no;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <40>;
+		status = "disabled";
+	};
+};

@@ -1,0 +1,19 @@
+* Broadcom cable/DSL/settop platforms
+
+SoCs:
+
+Required properties:
+- compatible: "brcm,bcm3384", "brcm,bcm33843"
+- compatible: "brcm,bcm3384-viper", "brcm,bcm33843-viper"
+- compatible: "brcm,bcm6328"
+- compatible: "brcm,bcm7346", "brcm,bcm7425"
+
+Boards:
+
+Required properties:
+- compatible: "brcm,bcm93384wvg", "brcm,bcm93384wvg-viper"
+- compatible: "brcm,bcm9ejtagprb"
+- compatible: "brcm,bcm97346dbsmb", "brcm,bcm97425svmb"
+
+The experimental -viper variants are for running Linux on the 3384's
+BMIPS4355 cable modem CPU instead of the BMIPS5000 application processor.
