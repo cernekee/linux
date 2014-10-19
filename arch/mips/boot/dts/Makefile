@@ -1,3 +1,12 @@
+dtb-$(CONFIG_BMIPS_MULTIPLATFORM)	+= bcm93384wvg.dtb \
+					   bcm93384wvg_viper.dtb \
+					   bcm96368mvwg.dtb \
+					   bcm9ejtagprb.dtb \
+					   bcm97125cbmb.dtb \
+					   bcm97346dbsmb.dtb \
+					   bcm97360svmb.dtb \
+					   bcm97420c.dtb \
+					   bcm97425svmb.dtb
 dtb-$(CONFIG_CAVIUM_OCTEON_SOC)		+= octeon_3xxx.dtb octeon_68xx.dtb
 dtb-$(CONFIG_DT_EASY50712)		+= easy50712.dtb
 dtb-$(CONFIG_DT_XLP_EVP)		+= xlp_evp.dtb

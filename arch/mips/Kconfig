@@ -115,6 +115,43 @@ config ATH79
 	help
 	  Support for the Atheros AR71XX/AR724X/AR913X SoCs.
 
+config BMIPS_MULTIPLATFORM
+	bool "Broadcom BCM33xx/BCM63xx/BCM7xxx multiplatform kernel"
+	select BOOT_RAW
+	select NO_EXCEPT_FILL
+	select USE_OF
+	select BUILTIN_DTB
+	select FW_CFE
+	select CEVT_R4K
+	select CSRC_R4K
+	select SYNC_R4K
+	select COMMON_CLK
+	select BCM7038_L1_IRQ
+	select BCM7120_L2_IRQ
+	select BRCMSTB_L2_IRQ
+	select IRQ_CPU
+	select RAW_IRQ_ACCESSORS
+	select DMA_NONCOHERENT
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_SUPPORTS_BIG_ENDIAN
+	select SYS_SUPPORTS_HIGHMEM
+	select SYS_HAS_CPU_BMIPS3300
+	select SYS_HAS_CPU_BMIPS4350
+	select SYS_HAS_CPU_BMIPS4380
+	select SYS_HAS_CPU_BMIPS5000
+	select SWAP_IO_SPACE
+	select USB_EHCI_BIG_ENDIAN_DESC
+	select USB_EHCI_BIG_ENDIAN_MMIO
+	select USB_OHCI_BIG_ENDIAN_DESC
+	select USB_OHCI_BIG_ENDIAN_MMIO
+	help
+	  Build a multiplatform DT-based kernel image that boots on select
+	  BCM33xx cable modem chips, BCM63xx DSL chips, and BCM7xxx set-top
+	  box chips.  Note that CONFIG_CPU_BIG_ENDIAN/CONFIG_CPU_LITTLE_ENDIAN
+	  must be set appropriately for your board, and the dts/dtsi files may
+	  require changes based on the system endianness.
+
 config BCM47XX
 	bool "Broadcom BCM47XX based boards"
 	select ARCH_WANT_OPTIONAL_GPIOLIB

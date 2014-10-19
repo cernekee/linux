@@ -1,0 +1,99 @@
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "brcm,bcm7125";
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		mips-hpt-frequency = <202500000>;
+
+		cpu@0 {
+			compatible = "brcm,bmips4380";
+			device_type = "cpu";
+			reg = <0>;
+		};
+
+		cpu@1 {
+			compatible = "brcm,bmips4380";
+			device_type = "cpu";
+			reg = <1>;
+		};
+	};
+
+	aliases {
+		uart0 = &uart0;
+	};
+
+	cpu_intc: cpu_intc@0 {
+		#address-cells = <0>;
+		compatible = "mti,cpu-interrupt-controller";
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+
+	periph_intc: periph_intc@10441400 {
+		compatible = "brcm,bcm7038-l1-intc";
+		reg = <0x10441400 0x30 0x10441600 0x30>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&cpu_intc>;
+		interrupts = <2>, <3>;
+	};
+
+	upg_irq0_intc: upg_irq0_intc@10406780 {
+		compatible = "brcm,bcm7120-l2-intc";
+		reg = <0x10406780 0x8>;
+
+		brcm,int-map-mask = <0x44>;
+		brcm,int-fwd-mask = <0x70000>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&periph_intc>;
+		interrupts = <18>;
+	};
+
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		uart_clk: uart_clk@0 {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <81000000>;
+		};
+	};
+
+	uart0: serial@10406b00 {
+		compatible = "ns16550a";
+		reg = <0x10406b00 0x20>;
+		reg-io-width = <0x4>;
+		reg-shift = <0x2>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <21>;
+		clocks = <&uart_clk>;
+		status = "disabled";
+	};
+
+	ehci0: usb@10488300 {
+		compatible = "brcm,bcm7125-ehci", "generic-ehci";
+		reg = <0x10488300 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <60>;
+		status = "disabled";
+	};
+
+	ohci0: usb@10488400 {
+		compatible = "brcm,bcm7125-ohci", "generic-ohci";
+		reg = <0x10488400 0x100>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <61>;
+		status = "disabled";
+	};
+};
