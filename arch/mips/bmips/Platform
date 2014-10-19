@@ -1,0 +1,7 @@
+#
+# Broadcom BMIPS multiplatform kernel
+#
+platform-$(CONFIG_BMIPS_MULTIPLATFORM)	+= bmips/
+cflags-$(CONFIG_BMIPS_MULTIPLATFORM)	+=				\
+		-I$(srctree)/arch/mips/include/asm/mach-bmips/
+load-$(CONFIG_BMIPS_MULTIPLATFORM)	:= 0xffffffff80010000
