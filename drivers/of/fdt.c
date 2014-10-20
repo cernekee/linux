@@ -755,6 +755,11 @@ int __init early_init_dt_scan_chosen_serial(void)
 	int l;
 	const struct of_device_id *match = __earlycon_of_table;
 	const void *fdt = initial_boot_params;
+	static int done;
+
+	if (done)
+		return -EBUSY;
+	done = 1;
 
 	offset = fdt_path_offset(fdt, "/chosen");
 	if (offset < 0)
@@ -792,10 +797,9 @@ int __init early_init_dt_scan_chosen_serial(void)
 
 static int __init setup_of_earlycon(char *buf)
 {
-	if (buf)
-		return 0;
-
-	return early_init_dt_scan_chosen_serial();
+	if (!buf)
+		early_init_dt_scan_chosen_serial();
+	return 0;
 }
 early_param("earlycon", setup_of_earlycon);
 #endif
