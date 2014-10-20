@@ -14,6 +14,17 @@ config SERIAL_EARLYCON
 	  the console before standard serial driver is probed. The console is
 	  enabled when early_param is processed.
 
+config SERIAL_EARLYCON_FORCE
+	bool "Always enable early console"
+	depends on SERIAL_EARLYCON
+	help
+	  Traditionally, enabling the early console has required passing in
+	  the "earlycon" parameter on the kernel command line.  On systems
+	  under development it may be desirable to enable earlycon
+	  unconditionally rather than to force the user to manually add it
+	  to the boot argument string, as boot failures often occur before
+	  the standard serial driver is probed.
+
 source "drivers/tty/serial/8250/Kconfig"
 
 comment "Non-8250 serial port support"

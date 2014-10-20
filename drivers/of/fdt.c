@@ -1013,6 +1013,11 @@ bool __init early_init_dt_verify(void *params)
 
 void __init early_init_dt_scan_nodes(void)
 {
+#ifdef CONFIG_SERIAL_EARLYCON_FORCE
+	if (early_init_dt_scan_chosen_serial() < 0)
+		pr_warn("Unable to set up earlycon from stdout-path\n");
+#endif
+
 	/* Retrieve various information from the /chosen node */
 	of_scan_flat_dt(early_init_dt_scan_chosen, boot_command_line);
 
