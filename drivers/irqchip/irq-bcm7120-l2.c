@@ -48,7 +48,7 @@ static void bcm7120_l2_intc_irq_handle(unsigned int irq, struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	status = __raw_readl(b->base + IRQSTAT);
+	status = irq_reg_readl(b->base + IRQSTAT);
 	do {
 		irq = ffs(status) - 1;
 		status &= ~(1 << irq);
@@ -66,10 +66,10 @@ static void bcm7120_l2_intc_suspend(struct irq_data *d)
 
 	irq_gc_lock(gc);
 	/* Save the current mask and the interrupt forward mask */
-	b->saved_mask = __raw_readl(b->base + IRQEN) | b->irq_fwd_mask;
+	b->saved_mask = irq_reg_readl(b->base + IRQEN) | b->irq_fwd_mask;
 	if (b->can_wake) {
 		reg = b->saved_mask | gc->wake_active;
-		__raw_writel(reg, b->base + IRQEN);
+		irq_reg_writel(reg, b->base + IRQEN);
 	}
 	irq_gc_unlock(gc);
 }
@@ -81,7 +81,7 @@ static void bcm7120_l2_intc_resume(struct irq_data *d)
 
 	/* Restore the saved mask */
 	irq_gc_lock(gc);
-	__raw_writel(b->saved_mask, b->base + IRQEN);
+	irq_reg_writel(b->saved_mask, b->base + IRQEN);
 	irq_gc_unlock(gc);
 }
 
@@ -133,7 +133,7 @@ int __init bcm7120_l2_intc_of_init(struct device_node *dn,
 	/* Enable all interrupt specified in the interrupt forward mask and have
 	 * the other disabled
 	 */
-	__raw_writel(data->irq_fwd_mask, data->base + IRQEN);
+	irq_reg_writel(data->irq_fwd_mask, data->base + IRQEN);
 
 	num_parent_irqs = of_irq_count(dn);
 	if (num_parent_irqs <= 0) {
