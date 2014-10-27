@@ -21,6 +21,7 @@ extern void rm9k_cpu_irq_init(void);
 struct device_node;
 extern int mips_cpu_intc_init(struct device_node *of_node,
 			      struct device_node *parent);
+extern void mips_cpu_intc_dispatch(void);
 #endif
 
 #endif /* _ASM_IRQ_CPU_H */
