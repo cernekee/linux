@@ -30,6 +30,7 @@
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
+#include <linux/bitops.h>
 #include <linux/irq.h>
 #include <linux/irqdomain.h>
 
@@ -153,5 +154,15 @@ int __init mips_cpu_intc_init(struct device_node *of_node,
 		panic("Failed to add irqdomain for MIPS CPU");
 
 	return 0;
+}
+
+void mips_cpu_intc_dispatch(void)
+{
+	unsigned long pending =
+		(read_c0_status() & read_c0_cause() & ST0_IM) >> STATUSB_IP0;
+	int bit;
+
+	for_each_set_bit(bit, &pending, 8)
+		do_IRQ(MIPS_CPU_IRQ_BASE + bit);
 }
 #endif /* CONFIG_IRQ_DOMAIN */
