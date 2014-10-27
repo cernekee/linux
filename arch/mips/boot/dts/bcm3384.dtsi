@@ -47,7 +47,7 @@
 	};
 
 	periph_intc: periph_intc@14e00038 {
-		compatible = "brcm,bcm3384-intc";
+		compatible = "brcm,bcm7120-l2-intc";
 		reg = <0x14e00038 0x8 0x14e00340 0x8>;
 
 		interrupt-controller;
@@ -55,10 +55,11 @@
 
 		interrupt-parent = <&cpu_intc>;
 		interrupts = <4>;
+		brcm,int-map-mask = <0xffffffff 0xffffffff>;
 	};
 
 	zmips_intc: zmips_intc@104b0060 {
-		compatible = "brcm,bcm3384-intc";
+		compatible = "brcm,bcm7120-l2-intc";
 		reg = <0x104b0060 0x8>;
 
 		interrupt-controller;
@@ -66,10 +67,11 @@
 
 		interrupt-parent = <&periph_intc>;
 		interrupts = <29>;
+		brcm,int-map-mask = <0xffffffff>;
 	};
 
 	iop_intc: iop_intc@14e00058 {
-		compatible = "brcm,bcm3384-intc";
+		compatible = "brcm,bcm7120-l2-intc";
 		reg = <0x14e00058 0x8>;
 
 		interrupt-controller;
@@ -77,6 +79,7 @@
 
 		interrupt-parent = <&cpu_intc>;
 		interrupts = <6>;
+		brcm,int-map-mask = <0xffffffff>;
 	};
 
 	uart0: serial@14e00520 {
