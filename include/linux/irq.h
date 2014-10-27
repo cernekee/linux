@@ -639,11 +639,24 @@ void arch_teardown_hwirq(unsigned int irq);
 void irq_init_desc(unsigned int irq);
 #endif
 
+#ifdef CONFIG_RAW_IRQ_ACCESSORS
+
+#ifndef irq_reg_writel
+# define irq_reg_writel(val, addr)	__raw_writel(val, addr)
+#endif
+#ifndef irq_reg_readl
+# define irq_reg_readl(addr)		__raw_readl(addr)
+#endif
+
+#else
+
 #ifndef irq_reg_writel
 # define irq_reg_writel(val, addr)	writel(val, addr)
 #endif
 #ifndef irq_reg_readl
 # define irq_reg_readl(addr)		readl(addr)
+#endif
+
 #endif
 
 /**
