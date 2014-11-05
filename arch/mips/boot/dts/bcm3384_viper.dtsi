@@ -1,0 +1,63 @@
+/include/ "bcm3384_common.dtsi"
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "brcm,bcm3384-viper", "brcm,bcm33843-viper";
+
+	memory@0 {
+		device_type = "memory";
+
+		/*
+		 * Typical ranges.  The bootloader should fill these in.
+		 * Note: no DMA translation on Viper (UBUS).
+		 */
+		reg = <0x06000000 0x02000000 0x0e000000 0x02000000>;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* 1/2 of the CPU core clock (standard MIPS behavior) */
+		mips-hpt-frequency = <300000000>;
+
+		cpu@0 {
+			compatible = "brcm,bmips4350";
+			device_type = "cpu";
+			reg = <0>;
+		};
+	};
+
+	cpu_intc: cpu_intc@0 {
+		#address-cells = <0>;
+		compatible = "mti,cpu-interrupt-controller";
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+
+	periph_intc: periph_intc@14e00048 {
+		compatible = "brcm,bcm7120-l2-intc";
+		reg = <0x14e00048 0x8 0x14e00350 0x8>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&cpu_intc>;
+		interrupts = <4>;
+		brcm,int-map-mask = <0xffffffff 0xffffffff>;
+	};
+
+	cmips_intc: cmips_intc@151f8048 {
+		compatible = "brcm,bcm7120-l2-intc";
+		reg = <0x151f8048 0x8>;
+
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		interrupt-parent = <&periph_intc>;
+		interrupts = <30>;
+		brcm,int-map-mask = <0xffffffff>;
+	};
+};

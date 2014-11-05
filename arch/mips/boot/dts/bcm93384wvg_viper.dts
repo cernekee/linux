@@ -1,10 +1,10 @@
 /dts-v1/;
 
-/include/ "bcm3384_zephyr.dtsi"
+/include/ "bcm3384_viper.dtsi"
 
 / {
-	compatible = "brcm,bcm93384wvg", "brcm,bcm3384";
-	model = "Broadcom BCM93384WVG";
+	compatible = "brcm,bcm93384wvg-viper", "brcm,bcm3384-viper";
+	model = "Broadcom BCM93384WVG-viper";
 
 	chosen {
 		bootargs = "console=ttyS0,115200";
