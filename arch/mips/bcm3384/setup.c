@@ -8,9 +8,11 @@
  */
 
 #include <linux/init.h>
+#include <linux/bitops.h>
 #include <linux/bootmem.h>
 #include <linux/clk-provider.h>
 #include <linux/ioport.h>
+#include <linux/kernel.h>
 #include <linux/of.h>
 #include <linux/of_fdt.h>
 #include <linux/of_platform.h>
@@ -18,13 +20,52 @@
 #include <asm/addrspace.h>
 #include <asm/bmips.h>
 #include <asm/bootinfo.h>
+#include <asm/cpu-type.h>
+#include <asm/mipsregs.h>
 #include <asm/prom.h>
 #include <asm/smp-ops.h>
 #include <asm/time.h>
+#include <asm/traps.h>
+
+#define CMT_LOCAL_TPID		BIT(31)
+#define RELO_NORMAL_VEC		BIT(18)
+
+static const unsigned long kbase =
+	ALIGN((unsigned long)VMLINUX_LOAD_ADDRESS, 1 << 20);
+
+static void kbase_setup(void)
+{
+	__raw_writel(kbase | RELO_NORMAL_VEC,
+		     BMIPS_GET_CBR() + BMIPS_RELO_VECTOR_CONTROL_1);
+	ebase = kbase;
+}
 
 void __init prom_init(void)
 {
 	register_bmips_smp_ops();
+
+	/*
+	 * Some experimental CM boxes are set up to let CM own the Viper TP0
+	 * and let Linux own TP1.  This requires moving the kernel
+	 * load address to a non-conflicting region (e.g. via
+	 * CONFIG_PHYSICAL_START) and supplying an alternate DTB.
+	 * If we detect this condition, we need to move the MIPS exception
+	 * vectors up to an area that we own.
+	 *
+	 * This is distinct from the OTHER special case mentioned in
+	 * smp-bmips.c (boot on TP1, but enable SMP, then TP0 becomes our
+	 * logical CPU#1).  For the Viper TP1 case, SMP is off limits.
+	 *
+	 * Also note that many BMIPS435x CPUs do not have a
+	 * BMIPS_RELO_VECTOR_CONTROL_1 register, so it isn't safe to just
+	 * write VMLINUX_LOAD_ADDRESS into that register on every SoC.
+	 */
+	if (current_cpu_type() == CPU_BMIPS4350 &&
+	    kbase != CKSEG0 &&
+	    read_c0_brcm_cmt_local() & CMT_LOCAL_TPID) {
+		board_ebase_setup = &kbase_setup;
+		bmips_smp_enabled = 0;
+	}
 }
 
 void __init prom_free_prom_memory(void)
