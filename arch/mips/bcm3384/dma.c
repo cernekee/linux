@@ -10,10 +10,13 @@
 #include <linux/dma-direction.h>
 #include <linux/dma-mapping.h>
 #include <linux/init.h>
+#include <linux/io.h>
 #include <linux/mm.h>
 #include <linux/of.h>
 #include <linux/pci.h>
 #include <linux/types.h>
+#include <asm/bmips.h>
+#include <asm/cpu-type.h>
 #include <dma-coherence.h>
 
 /*
@@ -34,6 +37,8 @@ static u32 bcm3384_dma_xor_limit = 0xffffffff;
  */
 #define BCM3384_MEM_HOLE_PA	0x10000000
 #define BCM3384_MEM_HOLE_SIZE	0x10000000
+
+#define FLUSH_RAC		0x100
 
 static dma_addr_t bcm3384_phys_to_dma(struct device *dev, phys_addr_t pa)
 {
@@ -79,3 +84,23 @@ static int __init bcm3384_init_dma_xor(void)
 	return 0;
 }
 arch_initcall(bcm3384_init_dma_xor);
+
+void plat_unmap_dma_mem(struct device *dev, dma_addr_t dma_addr,
+	size_t size, enum dma_data_direction dir)
+{
+	if (dir == DMA_TO_DEVICE)
+		return;
+
+	switch (current_cpu_type()) {
+	case CPU_BMIPS3300:
+	case CPU_BMIPS4350:
+	case CPU_BMIPS4380: {
+		void __iomem *cbr = BMIPS_GET_CBR();
+
+		/* Flush stale data out of the readahead cache */
+		__raw_writel(FLUSH_RAC, cbr + BMIPS_RAC_CONFIG);
+		__raw_readl(cbr + BMIPS_RAC_CONFIG);
+		break;
+	}
+	}
+}

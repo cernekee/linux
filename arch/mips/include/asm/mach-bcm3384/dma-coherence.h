@@ -21,11 +21,8 @@ extern dma_addr_t plat_map_dma_mem(struct device *dev, void *addr, size_t size);
 extern dma_addr_t plat_map_dma_mem_page(struct device *dev, struct page *page);
 extern unsigned long plat_dma_addr_to_phys(struct device *dev,
 	dma_addr_t dma_addr);
-
-static inline void plat_unmap_dma_mem(struct device *dev, dma_addr_t dma_addr,
-	size_t size, enum dma_data_direction direction)
-{
-}
+extern void plat_unmap_dma_mem(struct device *dev, dma_addr_t dma_addr,
+	size_t size, enum dma_data_direction direction);
 
 static inline int plat_dma_supported(struct device *dev, u64 mask)
 {
