@@ -14,6 +14,7 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/kconfig.h>
+#include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
 #include <linux/of_irq.h>
@@ -22,6 +23,7 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/io.h>
+#include <linux/ioport.h>
 #include <linux/irqdomain.h>
 #include <linux/reboot.h>
 #include <linux/bitops.h>
@@ -29,12 +31,8 @@
 
 #include "irqchip.h"
 
-/* Register offset in the L2 interrupt controller */
-#define IRQEN		0x00
-#define IRQSTAT		0x04
-
 #define MAX_WORDS	4
-#define MAX_MAPPINGS	MAX_WORDS
+#define MAX_MAPPINGS	(MAX_WORDS * 2)
 #define IRQS_PER_WORD	32
 
 struct bcm7120_l2_intc_data {
@@ -128,6 +126,61 @@ static int bcm7120_l2_intc_init_one(struct device_node *dn,
 	return 0;
 }
 
+static int __init bcm7120_l2_intc_map_regs(struct device_node *dn,
+					   struct bcm7120_l2_intc_data *data)
+{
+	unsigned int idx, n_regs = 0, gc_idx = 0;
+	void __iomem *en_reg = NULL, *stat_reg = NULL;
+
+	for (idx = 0; n_regs < MAX_WORDS * 2; idx++) {
+		struct resource res;
+		resource_size_t sz;
+		void __iomem *map_base;
+
+		if (of_address_to_resource(dn, idx, &res))
+			break;
+		sz = resource_size(&res);
+		map_base = data->map_base[idx] = ioremap(res.start, sz);
+		if (!map_base)
+			return -EINVAL;
+
+		if (n_regs % 2 == 0) {
+			/* Accept either enable + status, or just enable:
+			 * reg = <0x10000024 0x8>;
+			 * reg = <0x10000024 0x4 0x1000002c 0x4>;
+			 */
+			en_reg = map_base;
+			if (sz == 8) {
+				stat_reg = map_base + 0x04;
+				n_regs += 2;
+			} else if (sz == 4) {
+				n_regs += 1;
+				continue;
+			} else {
+				return -EINVAL;
+			}
+		} else {
+			/* If the last register was enable, we're looking
+			 * for its corresponding status register
+			 */
+			if (sz == 4) {
+				stat_reg = map_base;
+				n_regs += 1;
+			} else {
+				return -EINVAL;
+			}
+		}
+
+		data->pair_base[gc_idx] = min(en_reg, stat_reg);
+		data->en_offset[gc_idx] = en_reg - data->pair_base[gc_idx];
+		data->stat_offset[gc_idx] = stat_reg - data->pair_base[gc_idx];
+		gc_idx++;
+	}
+
+	data->n_words = gc_idx;
+	return gc_idx ? 0 : -ENOENT;
+}
+
 int __init bcm7120_l2_intc_of_init(struct device_node *dn,
 					struct device_node *parent)
 {
@@ -144,18 +197,7 @@ int __init bcm7120_l2_intc_of_init(struct device_node *dn,
 	if (!data)
 		return -ENOMEM;
 
-	for (idx = 0; idx < MAX_WORDS; idx++) {
-		data->map_base[idx] = of_iomap(dn, idx);
-		if (!data->map_base[idx])
-			break;
-
-		data->pair_base[idx] = data->map_base[idx];
-		data->en_offset[idx] = IRQEN;
-		data->stat_offset[idx] = IRQSTAT;
-
-		data->n_words = idx + 1;
-	}
-	if (!data->n_words) {
+	if (bcm7120_l2_intc_map_regs(dn, data) < 0) {
 		pr_err("failed to remap intc L2 registers\n");
 		ret = -ENOMEM;
 		goto out_unmap;
