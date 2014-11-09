@@ -55,7 +55,10 @@ Required properties:
 - compatible: should be "brcm,bcm7120-l2-intc"
 - reg: specifies the base physical address and size of the registers;
   multiple pairs may be specified, with the first pair handling IRQ offsets
-  0..31 and the second pair handling 32..63
+  0..31 and the second pair handling 32..63. A register pair may be
+  specified as either <base 0x8>, where IRQEN lives at base+0x00 and
+  IRQSTAT lives at base+0x04, or <enreg 0x4 statreg 0x4>, where the
+  address of each register is listed independently.
 - interrupt-controller: identifies the node as an interrupt controller
 - #interrupt-cells: specifies the number of cells needed to encode an interrupt
   source, should be 1.
