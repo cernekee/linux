@@ -23,7 +23,7 @@
 	};
 
 	aliases {
-		uart0 = &uart0;
+		serial0 = &uart0;
 	};
 
 	cpu_intc: cpu_intc@0 {
@@ -71,11 +71,10 @@
 	};
 
 	uart0: serial@10406900 {
-		compatible = "ns16550a";
-		/* FIXME: need to use 0x10406900 for LE builds */
-		reg = <0x10406903 0x20>;
-		reg-io-width = <0x1>;
-		reg-shift = <0x2>;
+		compatible = "brcm,bcm7401-upg-uart";
+		reg = <0x10406900 0x20>;
+		native-endian;
+		fifo-size = <32>;
 		interrupt-parent = <&periph_intc>;
 		interrupts = <64>;
 		clocks = <&uart_clk>;
