@@ -1,4 +1,25 @@
 PXA UART controller
 
 Required properties:
-- compatible : should be "mrvl,mmp-uart" or "mrvl,pxa-uart".
+- compatible : should be "mrvl,mmp-uart", "mrvl,pxa-uart", or
+  "brcm,bcm7401-uart".
+- interrupts : a single interrupt specifier.
+- clocks : phandle to a clock; used to compute the baud divisor.
+
+Optional properties:
+- fifo-size : defaults to 64 bytes.
+- big-endian : always use BE register accesses.
+- native-endian : use BE register accesses if the kernel was built for BE,
+  otherwise use LE register accesses.
+
+Example:
+
+	uart0: serial@10406900 {
+		compatible = "brcm,bcm7401-upg-uart";
+		reg = <0x10406900 0x20>;
+		native-endian;
+                fifo-size = <32>;
+		interrupt-parent = <&periph_intc>;
+		interrupts = <64>;
+		clocks = <&uart_clk>;
+	};
