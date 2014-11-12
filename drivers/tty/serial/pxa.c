@@ -60,13 +60,19 @@ struct uart_pxa_port {
 static inline unsigned int serial_in(struct uart_pxa_port *up, int offset)
 {
 	offset <<= 2;
-	return readl(up->port.membase + offset);
+	if (up->port.iotype == UPIO_MEM32BE)
+		return ioread32be(up->port.membase + offset);
+	else
+		return readl(up->port.membase + offset);
 }
 
 static inline void serial_out(struct uart_pxa_port *up, int offset, int value)
 {
 	offset <<= 2;
-	writel(value, up->port.membase + offset);
+	if (up->port.iotype == UPIO_MEM32BE)
+		iowrite32be(value, up->port.membase + offset);
+	else
+		writel(value, up->port.membase + offset);
 }
 
 static void serial_pxa_enable_ms(struct uart_port *port)
@@ -833,6 +839,7 @@ static int serial_pxa_probe_dt(struct platform_device *pdev,
 {
 	struct device_node *np = pdev->dev.of_node;
 	int ret;
+	u32 val;
 
 	if (!np)
 		return 1;
@@ -843,6 +850,13 @@ static int serial_pxa_probe_dt(struct platform_device *pdev,
 		return ret;
 	}
 	sport->port.line = ret;
+
+	if (of_property_read_u32(np, "fifo-size", &val) == 0)
+		sport->port.fifosize = val;
+
+	sport->port.iotype =
+		of_device_is_big_endian(np) ? UPIO_MEM32BE : UPIO_MEM32;
+
 	return 0;
 }
 
