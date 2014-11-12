@@ -794,6 +794,8 @@ int __init early_init_dt_scan_chosen_serial(void)
 
 	while (match->compatible[0]) {
 		unsigned long addr;
+		unsigned char iotype = UPIO_MEM;
+
 		if (fdt_node_check_compatible(fdt, offset, match->compatible)) {
 			match++;
 			continue;
@@ -803,7 +805,10 @@ int __init early_init_dt_scan_chosen_serial(void)
 		if (!addr)
 			return -ENXIO;
 
-		of_setup_earlycon(addr, match->data);
+		if (of_fdt_is_big_endian(fdt, offset))
+			iotype = UPIO_MEM32BE;
+
+		of_setup_earlycon(addr, iotype, match->data);
 		return 0;
 	}
 	return -ENODEV;
