@@ -830,6 +830,7 @@ static const struct dev_pm_ops serial_pxa_pm_ops = {
 static struct of_device_id serial_pxa_dt_ids[] = {
 	{ .compatible = "mrvl,pxa-uart", },
 	{ .compatible = "mrvl,mmp-uart", },
+	{ .compatible = "brcm,bcm7401-upg-uart", },
 	{}
 };
 MODULE_DEVICE_TABLE(of, serial_pxa_dt_ids);
