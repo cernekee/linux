@@ -138,7 +138,7 @@ struct uart_port {
 	unsigned char		x_char;			/* xon/xoff char */
 	unsigned char		regshift;		/* reg offset shift */
 	unsigned char		iotype;			/* io access style */
-	unsigned char		unused1;
+	unsigned char		big_endian;		/* BE registers */
 
 #define UPIO_PORT		(0)
 #define UPIO_HUB6		(1)
