@@ -761,6 +761,51 @@ static struct console serial_pxa_console = {
 	.data		= &serial_pxa_reg,
 };
 
+static struct uart_pxa_port serial_pxa_early_port;
+
+static void __init early_wait_for_xmitr(struct uart_pxa_port *up)
+{
+	/* it's unsafe to call udelay() in the "early" variant */
+	while ((serial_in(up, UART_LSR) & BOTH_EMPTY) != BOTH_EMPTY)
+		;
+}
+
+static void __init serial_pxa_early_putchar(struct uart_port *port, int ch)
+{
+	struct uart_pxa_port *up = (struct uart_pxa_port *)port;
+
+	early_wait_for_xmitr(up);
+	serial_out(up, UART_TX, ch);
+}
+
+static void __init serial_pxa_early_write(struct console *con, const char *s,
+					  unsigned n)
+{
+	uart_console_write(&serial_pxa_early_port.port, s, n,
+			   serial_pxa_early_putchar);
+	early_wait_for_xmitr(&serial_pxa_early_port);
+}
+
+static int __init serial_pxa_early_console_setup(struct earlycon_device *device,
+						 const char *opt)
+{
+	if (!device->port.membase)
+		return -ENODEV;
+
+	serial_pxa_early_port.port.membase = device->port.membase;
+	serial_pxa_early_port.port.big_endian = device->port.big_endian;
+
+	device->con->write = serial_pxa_early_write;
+	return 0;
+}
+
+OF_EARLYCON_DECLARE(pxa_uart, "mrvl,pxa-uart",
+		    serial_pxa_early_console_setup);
+OF_EARLYCON_DECLARE(mmp_uart, "mrvl,mmp-uart",
+		    serial_pxa_early_console_setup);
+OF_EARLYCON_DECLARE(bcm7401_upg_uart, "brcm,bcm7401-upg-uart",
+		    serial_pxa_early_console_setup);
+
 #define PXA_CONSOLE	&serial_pxa_console
 #else
 #define PXA_CONSOLE	NULL
