@@ -10,6 +10,7 @@
  */
 
 #include <linux/kernel.h>
+#include <linux/kconfig.h>
 #include <linux/initrd.h>
 #include <linux/memblock.h>
 #include <linux/of.h>
@@ -784,7 +785,13 @@ int __init early_init_dt_scan_chosen_serial(void)
 		if (!addr)
 			return -ENXIO;
 
-		of_setup_earlycon(addr, match->data);
+		if (fdt_getprop(fdt, offset, "big-endian", NULL) ||
+		    (fdt_getprop(fdt, offset, "native-endian", NULL) &&
+		     IS_ENABLED(CONFIG_CPU_BIG_ENDIAN))) {
+			of_setup_earlycon(addr, true, match->data);
+		} else {
+			of_setup_earlycon(addr, false, match->data);
+		}
 		return 0;
 	}
 	return -ENODEV;
