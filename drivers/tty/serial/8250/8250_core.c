@@ -428,6 +428,18 @@ static unsigned int mem32_serial_in(struct uart_port *p, int offset)
 	return readl(p->membase + offset);
 }
 
+static void mem32be_serial_out(struct uart_port *p, int offset, int value)
+{
+	offset = offset << p->regshift;
+	iowrite32be(value, p->membase + offset);
+}
+
+static unsigned int mem32be_serial_in(struct uart_port *p, int offset)
+{
+	offset = offset << p->regshift;
+	return ioread32be(p->membase + offset);
+}
+
 static unsigned int io_serial_in(struct uart_port *p, int offset)
 {
 	offset = offset << p->regshift;
@@ -466,6 +478,11 @@ static void set_io_from_upio(struct uart_port *p)
 		p->serial_out = mem32_serial_out;
 		break;
 
+	case UPIO_MEM32BE:
+		p->serial_in = mem32be_serial_in;
+		p->serial_out = mem32be_serial_out;
+		break;
+
 #if defined(CONFIG_MIPS_ALCHEMY) || defined(CONFIG_SERIAL_8250_RT288X)
 	case UPIO_AU:
 		p->serial_in = au_serial_in;
@@ -491,6 +508,7 @@ serial_port_out_sync(struct uart_port *p, int offset, int value)
 	switch (p->iotype) {
 	case UPIO_MEM:
 	case UPIO_MEM32:
+	case UPIO_MEM32BE:
 	case UPIO_AU:
 		p->serial_out(p, offset, value);
 		p->serial_in(p, UART_LCR);	/* safe, no side-effects */
@@ -2655,6 +2673,7 @@ static int serial8250_request_std_resource(struct uart_8250_port *up)
 	case UPIO_AU:
 	case UPIO_TSI:
 	case UPIO_MEM32:
+	case UPIO_MEM32BE:
 	case UPIO_MEM:
 		if (!port->mapbase)
 			break;
@@ -2691,6 +2710,7 @@ static void serial8250_release_std_resource(struct uart_8250_port *up)
 	case UPIO_AU:
 	case UPIO_TSI:
 	case UPIO_MEM32:
+	case UPIO_MEM32BE:
 	case UPIO_MEM:
 		if (!port->mapbase)
 			break;
