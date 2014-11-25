@@ -187,7 +187,7 @@ static int ehci_platform_probe(struct platform_device *dev)
 		if (of_property_read_bool(dev->dev.of_node, "big-endian-desc"))
 			ehci->big_endian_desc = 1;
 
-		if (of_property_read_bool(dev->dev.of_node, "big-endian"))
+		if (of_device_is_big_endian(dev->dev.of_node))
 			ehci->big_endian_mmio = ehci->big_endian_desc = 1;
 
 		priv->phy = devm_phy_get(&dev->dev, "usb");

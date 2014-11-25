@@ -157,7 +157,7 @@ static int ohci_platform_probe(struct platform_device *dev)
 		if (of_property_read_bool(dev->dev.of_node, "big-endian-desc"))
 			ohci->flags |= OHCI_QUIRK_BE_DESC;
 
-		if (of_property_read_bool(dev->dev.of_node, "big-endian"))
+		if (of_device_is_big_endian(dev->dev.of_node))
 			ohci->flags |= OHCI_QUIRK_BE_MMIO | OHCI_QUIRK_BE_DESC;
 
 		if (of_property_read_bool(dev->dev.of_node, "no-big-frame-no"))
