@@ -14,6 +14,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/io.h>
+#include <linux/of_fdt.h>
 #include <linux/serial_core.h>
 #include <linux/sizes.h>
 #include <linux/mod_devicetable.h>
@@ -148,11 +149,17 @@ int __init setup_earlycon(char *buf, const char *match,
 	return 0;
 }
 
-int __init of_setup_earlycon(unsigned long addr,
+#ifdef CONFIG_OF_FLATTREE
+
+int __init of_setup_earlycon(const void *fdt, int offset,
 			     int (*setup)(struct earlycon_device *, const char *))
 {
 	int err;
 	struct uart_port *port = &early_console_dev.port;
+	unsigned long addr = fdt_translate_address(fdt, offset);
+
+	if (!addr)
+		return -ENXIO;
 
 	port->iotype = UPIO_MEM;
 	port->mapbase = addr;
@@ -170,3 +177,5 @@ int __init of_setup_earlycon(unsigned long addr,
 	register_console(early_console_dev.con);
 	return 0;
 }
+
+#endif /* CONFIG_OF_FLATTREE */
