@@ -17,6 +17,7 @@
 #include <linux/of_fdt.h>
 #include <linux/serial_core.h>
 #include <linux/sizes.h>
+#include <linux/types.h>
 #include <linux/mod_devicetable.h>
 
 #ifdef CONFIG_FIX_EARLYCON_MEM
@@ -151,17 +152,46 @@ int __init setup_earlycon(char *buf, const char *match,
 
 #ifdef CONFIG_OF_FLATTREE
 
+static int __init get_serial_prop(int offset, const char *name, u32 *val)
+{
+	const u32 *prop;
+	int len;
+
+	prop = of_get_flat_dt_prop(offset, name, &len);
+	if (!prop)
+		return -ENOENT;
+	if (len != sizeof(u32))
+		return -EINVAL;
+
+	*val = be32_to_cpu(*prop);
+	return 0;
+}
+
 int __init of_setup_earlycon(const void *fdt, int offset,
 			     int (*setup)(struct earlycon_device *, const char *))
 {
 	int err;
 	struct uart_port *port = &early_console_dev.port;
 	unsigned long addr = fdt_translate_address(fdt, offset);
+	u32 val;
 
 	if (!addr)
 		return -ENXIO;
 
-	port->iotype = UPIO_MEM;
+	/* This should be kept in sync with of_platform_serial_setup() */
+	if (get_serial_prop(offset, "reg-offset", &val) == 0)
+		addr += val;
+	if (get_serial_prop(offset, "reg-shift", &val) == 0)
+		port->regshift = val;
+	if (get_serial_prop(offset, "fifo-size", &val) == 0)
+		port->fifosize = val;
+
+	if (get_serial_prop(offset, "reg-io-width", &val) == 0 && val == 4)
+		port->iotype = of_fdt_is_big_endian(fdt, offset) ?
+			       UPIO_MEM32BE : UPIO_MEM32;
+	else
+		port->iotype = UPIO_MEM;
+
 	port->mapbase = addr;
 	port->uartclk = BASE_BAUD * 16;
 	port->membase = earlycon_map(addr, SZ_4K);
@@ -172,7 +202,6 @@ int __init of_setup_earlycon(const void *fdt, int offset,
 		return err;
 	if (!early_console_dev.con->write)
 		return -ENODEV;
-
 
 	register_console(early_console_dev.con);
 	return 0;
